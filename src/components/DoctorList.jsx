@@ -22,25 +22,25 @@ const DoctorList = () => {
   if (!doctors) return <p>Loading...</p>
 
   return (
-    <div>
-        <h2>Doctors</h2>
-        <table className='table table-striped table-bordered'>
-            <thead className='thead-dark'>
+    <div className='bg-white shadow rounded-lg p-6'>
+        <h2 className='text-xl font-semibold mb-4'>Doctors</h2>
+        <table className='w-full text-left border-collapse'>
+            <thead className='bg-gray-800 text-white'>
                 <tr>
-                    <th>Doctor Name</th>
-                    <th>Specialty</th>
-                    <th>Available Days</th>
-                    <th>Hours</th>
+                    <th className='p-3'>Doctor Name</th>
+                    <th className='p-3'>Specialty</th>
+                    <th className='p-3'>Available Days</th>
+                    <th className='p-3'>Hours</th>
                 </tr>
             </thead>
             <tbody>
                 {
                     doctors.map(doctor =>
-                    <tr key={doctor.doctorId}>
-                        <td>Dr. {doctor.firstName} {doctor.lastName}</td>
-                        <td>{doctor.specialty}</td>
-                        <td>{formatDays(doctor.availableDays)}</td>
-                        <td>{doctor.availableTime || "09:00-17:00"}</td>
+                    <tr key={doctor.doctorId} className='border-b odd:bg-white even:bg-gray-50'>
+                        <td className='p-3'>Dr. {doctor.firstName} {doctor.lastName}</td>
+                        <td className='p-3'>{doctor.specialty}</td>
+                        <td className='p-3'>{formatDays(doctor.availableDays)}</td>
+                        <td className='p-3'>{doctor.availableTime || "09:00-17:00"}</td>
                     </tr>
                     )
                 }

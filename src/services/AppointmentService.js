@@ -1,35 +1,26 @@
-const BASE_URL = "http://localhost:8080";
+import api from "./api";
 
+// Dates are ISO-8601 local time, e.g. "2030-01-07T09:30:00".
 const appointmentService = {
-  getDoctorAppointments: function () {
-    return fetch(BASE_URL + "/doctor/appointments")
-      .then((response) => response.json());
-  },
+  // Doctors only see their own schedule, patients only their own bookings.
+  listAppointments: ({ doctorId, patientId, date, status } = {}) =>
+    api.get("/appointments", { params: { doctorId, patientId, date, status } }).then((res) => res.data),
 
-  getPatientAppointments: function () {
-    return fetch(BASE_URL + "/patient/appointments")
-      .then((response) => response.json());
-  },
+  getAppointment: (id) => api.get(`/appointments/${id}`).then((res) => res.data),
 
-  bookAppointment: function (appointment) {
-    return fetch(BASE_URL + "/patient/book", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(appointment)
-    }).then((response) => response.json());
-  },
+  // Patients: { doctorId, appointmentDate, reason? }. Admins also pass patientId.
+  bookAppointment: (appointment) => api.post("/appointments", appointment).then((res) => res.data),
 
-  updateAvailability: function (availability) {
-    return fetch(BASE_URL + "/doctor/availability", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(availability)
-    }).then((response) => response.json());
-  }
+  // Reschedule: { doctorId, appointmentDate, reason? }
+  rescheduleAppointment: (id, changes) => api.put(`/appointments/${id}`, changes).then((res) => res.data),
+
+  // status: "SCHEDULED" | "COMPLETED" | "CANCELLED"
+  updateStatus: (id, status) => api.patch(`/appointments/${id}/status`, { status }).then((res) => res.data),
+
+  cancelAppointment: (id) => appointmentService.updateStatus(id, "CANCELLED"),
+
+  // Admin only (hard delete; prefer cancelling)
+  deleteAppointment: (id) => api.delete(`/appointments/${id}`),
 };
 
 export default appointmentService;

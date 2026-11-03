@@ -1,26 +1,27 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import React from 'react'
-import authService from "../services/AuthService"; 
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { errorMessage } from "../services/api";
 
 const LoginPage = () => {
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const { login } = useAuth();
+    const navigate = useNavigate();
 
     const handleLogin = (e) =>{
 
         e.preventDefault();
+        setError("");
 
-        authService.login(username, password)
-        .then((response) => {
-            localStorage.setItem("token", response.data.jwt)
-        })
-        .catch(() => {
-            setError("Invalid username or password");
+        login({ username, password })
+        .then(() => navigate("/dashboard"))
+        .catch((err) => {
+            setError(errorMessage(err, "Invalid username or password"));
         });
-
-
 
     };
 
@@ -33,7 +34,7 @@ const LoginPage = () => {
 
         {error && (
           <p className="text-red-500 text-sm text-center mb-4">{error}</p>
-        )} 
+        )}
 
         <div className="mb-4">
           <label className="block mb-1 text-gray-700">Username</label>
@@ -44,7 +45,7 @@ const LoginPage = () => {
             className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300"
             required
           />
-        </div> 
+        </div>
 
         <div className="mb-6">
           <label className="block mb-1 text-gray-700">Password</label>
@@ -63,6 +64,10 @@ const LoginPage = () => {
         >
           Login
         </button>
+
+        <p className="text-sm text-center mt-4">
+          No account? <Link to="/register" className="text-blue-600">Register</Link>
+        </p>
 
         </form>
     </div>

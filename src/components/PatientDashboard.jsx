@@ -38,12 +38,12 @@ function PatientDashboard() {
   }
 
   return (
-    <div className="p-6">
+    <div>
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
       <button
         onClick={() => setShowBooking(!showBooking)}
-        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 mb-6"
+        className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 mb-6 cursor-pointer"
       >
         {showBooking ? "Close" : "Book Appointment"}
       </button>
@@ -63,16 +63,16 @@ function PatientDashboard() {
       ) : (
         <ul className="space-y-3">
           {appointments.map((appt) => (
-            <li key={appt.appointmentId} className="bg-white shadow p-4 rounded-lg">
+            <li key={appt.appointmentId} className="bg-white shadow-sm border border-slate-100 p-5 rounded-2xl">
               <p>
-                <strong>Doctor:</strong> {appt.doctorName}
+                <strong>Doctor:</strong> Dr. {appt.doctorName}
                 {appt.doctorSpecialty && ` (${appt.doctorSpecialty})`}
               </p>
               <p><strong>When:</strong> {formatDateTime(appt.appointmentDate)}</p>
               {appt.reason && <p><strong>Reason:</strong> {appt.reason}</p>}
               <p><strong>Status:</strong> {appt.status}</p>
               {appt.status === "SCHEDULED" && (
-                <button onClick={() => cancel(appt.appointmentId)} className="bg-red-600 text-white px-3 py-1 rounded mt-2">
+                <button onClick={() => cancel(appt.appointmentId)} className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 cursor-pointer mt-2">
                   Cancel
                 </button>
               )}

@@ -41,12 +41,12 @@ function BookAppointment({ onBooked }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white shadow p-6 rounded-lg w-96 mb-8">
+    <form onSubmit={handleSubmit} className="bg-white shadow-sm border border-slate-100 p-6 rounded-2xl w-full max-w-md mb-8">
       <h2 className="text-xl font-semibold mb-4">Book Appointment</h2>
       {error && <p className="text-red-500 mb-3">{error}</p>}
 
       <label className="block mb-1">Doctor</label>
-      <select value={doctorId} onChange={(e) => setDoctorId(e.target.value)} className="border p-2 w-full mb-3" required>
+      <select value={doctorId} onChange={(e) => setDoctorId(e.target.value)} className="border border-slate-300 rounded-lg p-2 w-full mb-3 focus:outline-none focus:ring-2 focus:ring-teal-300" required>
         <option value="">Choose a doctor</option>
         {doctors.map((d) => (
           <option key={d.doctorId} value={d.doctorId}>
@@ -61,7 +61,7 @@ function BookAppointment({ onBooked }) {
         value={date}
         min={todayIso()}
         onChange={(e) => setDate(e.target.value)}
-        className="border p-2 w-full mb-3"
+        className="border border-slate-300 rounded-lg p-2 w-full mb-3 focus:outline-none focus:ring-2 focus:ring-teal-300"
         required
       />
 
@@ -71,7 +71,7 @@ function BookAppointment({ onBooked }) {
           {slots.length === 0 ? (
             <p className="text-gray-600 mb-3">No free times that day</p>
           ) : (
-            <select value={slot} onChange={(e) => setSlot(e.target.value)} className="border p-2 w-full mb-3" required>
+            <select value={slot} onChange={(e) => setSlot(e.target.value)} className="border border-slate-300 rounded-lg p-2 w-full mb-3 focus:outline-none focus:ring-2 focus:ring-teal-300" required>
               <option value="">Choose a time</option>
               {slots.map((s) => (
                 <option key={s} value={s}>{formatTime(s)}</option>
@@ -82,9 +82,9 @@ function BookAppointment({ onBooked }) {
       )}
 
       <label className="block mb-1">Reason (optional)</label>
-      <input type="text" value={reason} onChange={(e) => setReason(e.target.value)} className="border p-2 w-full mb-3" />
+      <input type="text" value={reason} onChange={(e) => setReason(e.target.value)} className="border border-slate-300 rounded-lg p-2 w-full mb-3 focus:outline-none focus:ring-2 focus:ring-teal-300" />
 
-      <button type="submit" disabled={!slot} className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50">
+      <button type="submit" disabled={!slot} className="bg-teal-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-teal-700 cursor-pointer disabled:opacity-50">
         Book
       </button>
     </form>

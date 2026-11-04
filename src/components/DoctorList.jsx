@@ -25,7 +25,7 @@ const DoctorList = () => {
     <div className='bg-white shadow rounded-lg p-6'>
         <h2 className='text-xl font-semibold mb-4'>Doctors</h2>
         <table className='w-full text-left border-collapse'>
-            <thead className='bg-gray-800 text-white'>
+            <thead className='bg-teal-700 text-white'>
                 <tr>
                     <th className='p-3'>Doctor Name</th>
                     <th className='p-3'>Specialty</th>
@@ -36,7 +36,7 @@ const DoctorList = () => {
             <tbody>
                 {
                     doctors.map(doctor =>
-                    <tr key={doctor.doctorId} className='border-b odd:bg-white even:bg-gray-50'>
+                    <tr key={doctor.doctorId} className='border-b border-slate-200 odd:bg-white even:bg-slate-50'>
                         <td className='p-3'>Dr. {doctor.firstName} {doctor.lastName}</td>
                         <td className='p-3'>{doctor.specialty}</td>
                         <td className='p-3'>{formatDays(doctor.availableDays)}</td>

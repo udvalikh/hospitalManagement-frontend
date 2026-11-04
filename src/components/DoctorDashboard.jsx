@@ -74,7 +74,7 @@ function DoctorDashboard() {
   }
 
   return (
-    <div className="p-6">
+    <div>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {message && <p className="text-green-600 mb-4">{message}</p>}
 
@@ -87,7 +87,7 @@ function DoctorDashboard() {
         ) : (
           <ul className="space-y-3">
             {appointments.map((appt) => (
-              <li key={appt.appointmentId} className="bg-white shadow p-4 rounded-lg">
+              <li key={appt.appointmentId} className="bg-white shadow-sm border border-slate-100 p-5 rounded-2xl">
                 <p><strong>Patient:</strong> {appt.patientName}</p>
                 <p><strong>When:</strong> {formatDateTime(appt.appointmentDate)}</p>
                 {appt.reason && <p><strong>Reason:</strong> {appt.reason}</p>}
@@ -96,13 +96,13 @@ function DoctorDashboard() {
                   <div className="flex gap-2 mt-2">
                     <button
                       onClick={() => changeStatus(appt.appointmentId, "COMPLETED")}
-                      className="bg-green-600 text-white px-3 py-1 rounded"
+                      className="bg-teal-600 text-white px-3 py-1 rounded-lg hover:bg-teal-700 cursor-pointer"
                     >
                       Mark Completed
                     </button>
                     <button
                       onClick={() => changeStatus(appt.appointmentId, "CANCELLED")}
-                      className="bg-red-600 text-white px-3 py-1 rounded"
+                      className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -116,7 +116,7 @@ function DoctorDashboard() {
 
       {/* Availability Section */}
       {profile && (
-        <div className="bg-white shadow p-6 rounded-lg w-96">
+        <div className="bg-white shadow-sm border border-slate-100 p-6 rounded-2xl w-full max-w-md">
           <h2 className="text-xl font-semibold mb-4">Set Availability</h2>
 
           <p className="text-sm text-gray-600 mb-2">Working days (none selected = every day)</p>
@@ -133,11 +133,11 @@ function DoctorDashboard() {
             type="text"
             value={availableTime}
             placeholder="Hours, e.g. 09:00-12:00,13:00-17:00 (blank = 09:00-17:00)"
-            className="border p-2 w-full mb-3"
+            className="border border-slate-300 rounded-lg p-2 w-full mb-3 focus:outline-none focus:ring-2 focus:ring-teal-300"
             onChange={(e) => setAvailableTime(e.target.value)}
           />
 
-          <button onClick={handleAvailabilitySubmit} className="bg-blue-600 text-white px-4 py-2 rounded">
+          <button onClick={handleAvailabilitySubmit} className="bg-teal-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-teal-700 cursor-pointer">
             Save
           </button>
         </div>

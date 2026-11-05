@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+/* Brand colours taken from the clinic logo: purple ring, red heart and cross. */
+@theme {
+  --color-brand-50: #f6f3fb;
+  --color-brand-100: #ece5f7;
+  --color-brand-200: #d8cbee;
+  --color-brand-300: #bba5e0;
+  --color-brand-400: #9a7bcd;
+  --color-brand-500: #7b58b8;
+  --color-brand-600: #5f3d9c;
+  --color-brand-700: #4f3283;
+  --color-brand-800: #41296b;
+  --color-brand-900: #2f1e4f;
+}
+
+html {
+  scroll-behavior: smooth;
+}

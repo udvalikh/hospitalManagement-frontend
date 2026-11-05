@@ -6,16 +6,20 @@ import RegisterPage from './components/RegisterPage';
 import DashBoard from './components/Dashboard';
 import AuthProvider from './context/AuthProvider';
 import { useAuth } from './context/AuthContext';
+import LanguageProvider from './i18n/LanguageProvider';
+import { useLang } from './i18n/LanguageContext';
 
 function RequireAuth({ children }) {
   const { session, loading } = useAuth();
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
+  const { t } = useLang();
+  if (loading) return <p className="text-center mt-10">{t("dashboard.loading")}</p>;
   return session ? children : <Navigate to="/login" replace />;
 }
 
 function App() {
 
   return (
+    <LanguageProvider>
     <AuthProvider>
       <Router>
         <Routes>
@@ -27,6 +31,7 @@ function App() {
         </Routes>
       </Router>
     </AuthProvider>
+    </LanguageProvider>
   )
 }
 

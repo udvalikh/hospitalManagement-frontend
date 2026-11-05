@@ -1,58 +1,37 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../i18n/LanguageContext';
 import doctorService from '../services/DoctorService';
-import site from '../config/site';
+import site, { openingHours } from '../config/site';
+import { formatDays } from '../utils/format';
 import PageLayout from './layout/PageLayout';
 import Icon from './layout/Icon';
 
-const DEPARTMENTS = [
-  { icon: "heart", name: "Cardiology", text: "Diagnosis and treatment of heart and blood vessel conditions." },
-  { icon: "smile", name: "Pediatrics", text: "Gentle, attentive care for infants, children and teenagers." },
-  { icon: "bolt", name: "Emergency Care", text: "Urgent medical help around the clock, every day of the year." },
-  { icon: "beaker", name: "Laboratory", text: "Blood tests and diagnostics with fast, reliable results." },
-  { icon: "shield", name: "Internal Medicine", text: "Prevention and treatment of adult diseases and chronic conditions." },
-  { icon: "users", name: "Family Medicine", text: "Ongoing care and check-ups for the whole family." },
-];
-
-const REASONS = [
-  { title: "Experienced specialists", text: "Doctors across key specialties, focused on safe and respectful care." },
-  { title: "Book online in minutes", text: "See each doctor's free times and pick the one that suits you." },
-  { title: "Your appointments in one place", text: "View, reschedule or cancel your visits from your own dashboard." },
-  { title: "Emergency care 24/7", text: `Day or night, call ${site.emergencyPhone} or come straight to our emergency department.` },
-];
-
-const STEPS = [
-  { icon: "users", title: "Create an account", text: "Register as a patient in under a minute." },
-  { icon: "calendar", title: "Choose a doctor & time", text: "Pick a specialist and one of their free slots." },
-  { icon: "check", title: "Visit the hospital", text: "Arrive at your time - we'll be ready for you." },
-];
-
-const formatDays = (days) =>
-  days && days.length > 0 ? days.map((d) => d.charAt(0) + d.slice(1, 3).toLowerCase()).join(", ") : "Every day";
+const STEP_ICONS = ["user", "calendar", "check"];
 
 const initials = (d) => `${d.firstName?.[0] ?? ""}${d.lastName?.[0] ?? ""}`;
 
 const SectionTitle = ({ eyebrow, title, text }) => (
   <div className="max-w-2xl mx-auto text-center mb-12">
-    <p className="text-teal-600 font-semibold tracking-widest uppercase text-sm">{eyebrow}</p>
-    <h2 className="mt-2 text-3xl md:text-4xl font-bold text-slate-900">{title}</h2>
+    <p className="text-red-600 font-semibold tracking-widest uppercase text-sm">{eyebrow}</p>
+    <h2 className="mt-2 text-3xl md:text-4xl font-bold text-brand-900">{title}</h2>
     {text && <p className="mt-4 text-slate-600">{text}</p>}
   </div>
 );
 
 const HomePage = () => {
   const { session } = useAuth();
+  const { t, lang } = useLang();
   const location = useLocation();
   const [doctors, setDoctors] = useState(null);
-  const [specialties, setSpecialties] = useState([]);
 
   // Patients book from the dashboard; visitors log in first.
   const bookLink = session ? "/dashboard" : "/login";
+  const services = t("home.services");
 
   useEffect(() => {
     doctorService.listDoctors().then(setDoctors).catch(() => setDoctors([]));
-    doctorService.getSpecialties().then(setSpecialties).catch(() => {});
   }, []);
 
   // Scroll to #section when the navbar links here.
@@ -68,126 +47,164 @@ const HomePage = () => {
     <PageLayout className="bg-white">
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-teal-50 via-white to-sky-50">
-        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-teal-100 blur-3xl opacity-60" />
-        <div className="absolute -bottom-32 -left-24 w-96 h-96 rounded-full bg-sky-100 blur-3xl opacity-60" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand-50 via-white to-red-50">
+        <div className="absolute -top-24 -right-24 w-[28rem] h-[28rem] rounded-full bg-brand-100 blur-3xl opacity-70" />
+        <div className="absolute -bottom-32 -left-24 w-96 h-96 rounded-full bg-red-100 blur-3xl opacity-50" />
 
-        <div className="relative max-w-7xl mx-auto px-6 py-20 lg:py-28 grid lg:grid-cols-2 gap-12 items-center">
+        <div className="relative max-w-7xl mx-auto px-6 py-16 lg:py-24 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-sm font-medium">
-              <Icon name="heart" className="w-4 h-4" /> {site.tagline}
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white shadow-sm text-brand-700 text-sm font-medium">
+              <Icon name="heart" className="w-4 h-4 text-red-600" /> {t("brand.tagline")}
             </span>
-            <h1 className="mt-6 text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight">
-              Welcome to <span className="text-teal-600">{site.name}</span>
+            <h1 className="mt-6 text-4xl lg:text-5xl font-extrabold text-brand-900 leading-tight">
+              {t("home.heroTitle")} <span className="text-red-600">{t("home.heroHighlight")}</span>
             </h1>
-            <p className="mt-6 text-lg text-slate-600 max-w-xl">
-              Quality healthcare with compassion. Find the right specialist and book your appointment online -
-              no phone queues, no waiting.
-            </p>
+            <p className="mt-6 text-lg text-slate-600 max-w-xl">{t("home.heroText")}</p>
             <div className="mt-8 flex flex-wrap gap-4">
-              <Link to={bookLink} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-teal-600 text-white font-semibold shadow-lg shadow-teal-600/20 hover:bg-teal-700 transition">
-                Book an Appointment <Icon name="arrow" className="w-5 h-5" />
+              <Link to={bookLink} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-red-600 text-white font-semibold shadow-lg shadow-red-600/25 hover:bg-red-700 transition">
+                <Icon name="calendar" className="w-5 h-5" /> {t("home.book")}
               </Link>
-              <Link to={{ pathname: "/", hash: "#doctors" }} className="px-6 py-3 rounded-xl bg-white text-slate-800 font-semibold border border-slate-200 hover:border-teal-300 hover:text-teal-700 transition">
-                Find a Doctor
+              <Link to={{ pathname: "/", hash: "#doctors" }} className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-white text-brand-800 font-semibold border border-brand-200 hover:border-brand-400 transition">
+                {t("home.findDoctor")} <Icon name="arrow" className="w-5 h-5" />
               </Link>
             </div>
           </div>
 
-          {/* Hero card */}
+          {/* Logo + booking steps card */}
           <div className="relative">
-            <div className="bg-white rounded-3xl shadow-2xl shadow-slate-200 p-8 pb-16 border border-slate-100">
-              <h3 className="text-xl font-bold text-slate-900">Book in 3 easy steps</h3>
-              <ol className="mt-6 space-y-6">
-                {STEPS.map((s, i) => (
+            <div className="bg-white rounded-[2rem] shadow-2xl shadow-brand-200/60 p-8 pb-16 border border-brand-50">
+              <div className="flex items-center gap-4 pb-6 border-b border-brand-50">
+                <img src="/logo.jpg" alt="" className="w-20 h-20 rounded-full object-cover" />
+                <div>
+                  <p className="text-xl font-bold text-brand-900">{t("brand.name")}</p>
+                  <p className="text-sm text-slate-500">{t("home.stepsTitle")}</p>
+                </div>
+              </div>
+              <ol className="mt-6 space-y-5">
+                {t("home.steps").map((s, i) => (
                   <li key={s.title} className="flex gap-4">
-                    <span className="flex items-center justify-center w-12 h-12 shrink-0 rounded-2xl bg-teal-50 text-teal-600">
-                      <Icon name={s.icon} />
+                    <span className="flex items-center justify-center w-12 h-12 shrink-0 rounded-2xl bg-brand-50 text-brand-600">
+                      <Icon name={STEP_ICONS[i]} />
                     </span>
                     <div>
-                      <p className="font-semibold text-slate-900">{i + 1}. {s.title}</p>
+                      <p className="font-semibold text-brand-900">{i + 1}. {s.title}</p>
                       <p className="text-sm text-slate-600">{s.text}</p>
                     </div>
                   </li>
                 ))}
               </ol>
             </div>
-            <div className="absolute -bottom-6 right-6 hidden sm:flex items-center gap-3 bg-red-600 text-white rounded-2xl px-5 py-4 shadow-xl">
+            <a href={`tel:${site.emergencyPhone}`} className="absolute -bottom-6 right-6 hidden sm:flex items-center gap-3 bg-red-600 text-white rounded-2xl px-5 py-4 shadow-xl hover:bg-red-700">
               <Icon name="phone" />
               <div>
-                <p className="text-xs uppercase tracking-wider text-red-100">Emergency</p>
+                <p className="text-xs uppercase tracking-wider text-red-100">{t("home.emergency")}</p>
                 <p className="text-xl font-bold">{site.emergencyPhone}</p>
               </div>
-            </div>
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Info strip */}
-      <section className="bg-teal-700 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Stats strip */}
+      <section className="bg-brand-700 text-white">
+        <div className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { value: doctors ? doctors.length : "-", label: "Specialist doctors" },
-            { value: specialties.length || "-", label: "Medical specialties" },
-            { value: "24/7", label: "Emergency care" },
-            { value: "30 min", label: "Appointment slots" },
+            { value: doctors ? doctors.length : "-", label: t("home.stats.doctors") },
+            { value: services.length, label: t("home.stats.services") },
+            { value: "24/7", label: t("home.stats.online") },
+            { value: t("home.stats.slotValue"), label: t("home.stats.slot") },
           ].map((s) => (
             <div key={s.label} className="text-center">
               <p className="text-3xl font-extrabold">{s.value}</p>
-              <p className="text-teal-100 text-sm mt-1">{s.label}</p>
+              <p className="text-brand-200 text-sm mt-1">{s.label}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Departments */}
-      <section id="departments" className="scroll-mt-28 py-20 bg-white">
+      {/* Services */}
+      <section id="services" className="scroll-mt-32 py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle
-            eyebrow="Our Departments"
-            title="Care for every stage of life"
-            text="From routine check-ups to urgent care, our departments work together to look after you and your family."
-          />
+          <SectionTitle eyebrow={t("home.servicesEyebrow")} title={t("home.servicesTitle")} text={t("home.servicesText")} />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {DEPARTMENTS.map((d) => (
-              <div key={d.name} className="group p-8 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition">
-                <span className="flex items-center justify-center w-14 h-14 rounded-2xl bg-teal-600 text-white group-hover:scale-110 transition">
-                  <Icon name={d.icon} className="w-7 h-7" />
+            {services.map((s) => (
+              <div key={s.title} className="group p-8 rounded-3xl border border-brand-100 bg-brand-50/50 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition">
+                <span className="flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-600 text-white group-hover:bg-red-600 transition">
+                  <Icon name={s.icon} className="w-7 h-7" />
                 </span>
-                <h3 className="mt-6 text-xl font-bold text-slate-900">{d.name}</h3>
-                <p className="mt-2 text-slate-600">{d.text}</p>
+                <h3 className="mt-6 text-xl font-bold text-brand-900">{s.title}</h3>
+                <p className="mt-2 text-slate-600">{s.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Doctors (live from the API) */}
-      <section id="doctors" className="scroll-mt-28 py-20 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle eyebrow="Our Doctors" title="Meet our specialists" text="See when each doctor works and book a time that fits your schedule." />
+      {/* Equipment / ultrasound (photos in public/images) */}
+      <section id="equipment" className="scroll-mt-32 py-20 bg-brand-900 text-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-[2.5rem] bg-brand-600/30 blur-2xl" />
+            <img
+              src="/images/ultrasound.jpg"
+              alt={t("home.equipmentTitle")}
+              className="relative w-full max-w-lg mx-auto aspect-square object-cover rounded-[2rem] shadow-2xl"
+            />
+          </div>
 
-          {doctors === null && <p className="text-center text-slate-500">Loading doctors...</p>}
-          {doctors?.length === 0 && <p className="text-center text-slate-500">Doctor information is not available right now.</p>}
+          <div>
+            <p className="text-red-400 font-semibold tracking-widest uppercase text-sm">{t("home.equipmentEyebrow")}</p>
+            <h2 className="mt-2 text-3xl md:text-4xl font-bold">{t("home.equipmentTitle")}</h2>
+            <p className="mt-4 text-brand-200">{t("home.equipmentText")}</p>
+
+            <ul className="mt-6 space-y-3">
+              {t("home.equipmentFeatures").map((f) => (
+                <li key={f} className="flex items-center gap-3">
+                  <Icon name="check" className="w-6 h-6 shrink-0 text-red-400" /> {f}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-8 rounded-3xl bg-white/5 border border-white/10 p-4 flex flex-col sm:flex-row gap-5 items-center">
+              <img src="/images/voluson-e10.jpg" alt="Voluson E10" className="w-full sm:w-56 rounded-2xl object-cover" />
+              <div>
+                <p className="text-xl font-bold">Voluson E10</p>
+                <p className="mt-1 text-sm text-brand-200">{t("home.machineText")}</p>
+                <Link to={bookLink} className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-600 font-semibold hover:bg-red-700 transition">
+                  <Icon name="calendar" className="w-5 h-5" /> {t("home.book")}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Doctors (live from the API) */}
+      <section id="doctors" className="scroll-mt-32 py-20 bg-brand-50/60">
+        <div className="max-w-7xl mx-auto px-6">
+          <SectionTitle eyebrow={t("home.doctorsEyebrow")} title={t("home.doctorsTitle")} text={t("home.doctorsText")} />
+
+          {doctors === null && <p className="text-center text-slate-500">{t("home.doctorsLoading")}</p>}
+          {doctors?.length === 0 && <p className="text-center text-slate-500">{t("home.doctorsNone")}</p>}
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {doctors?.map((d) => (
-              <div key={d.doctorId} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl transition">
-                <div className="h-24 bg-gradient-to-r from-teal-500 to-sky-500" />
+              <div key={d.doctorId} className="bg-white rounded-3xl shadow-sm border border-brand-100 overflow-hidden hover:shadow-xl transition">
+                <div className="h-24 bg-gradient-to-r from-brand-600 to-brand-400" />
                 <div className="px-6 pb-6 -mt-12">
                   <div className="w-24 h-24 rounded-full bg-white p-1 shadow-md">
-                    <div className="w-full h-full rounded-full bg-teal-50 text-teal-700 flex items-center justify-center text-2xl font-bold">
+                    <div className="w-full h-full rounded-full bg-brand-50 text-brand-700 flex items-center justify-center text-2xl font-bold">
                       {initials(d)}
                     </div>
                   </div>
-                  <h3 className="mt-4 text-xl font-bold text-slate-900">Dr. {d.firstName} {d.lastName}</h3>
-                  <p className="text-teal-600 font-medium">{d.specialty || "General Practice"}</p>
+                  <h3 className="mt-4 text-xl font-bold text-brand-900">{t("home.doctorPrefix")} {d.firstName} {d.lastName}</h3>
+                  <p className="text-red-600 font-medium">{d.specialty || t("home.generalPractice")}</p>
                   <ul className="mt-4 space-y-2 text-sm text-slate-600">
-                    <li className="flex items-center gap-2"><Icon name="calendar" className="w-4 h-4 text-slate-400" />{formatDays(d.availableDays)}</li>
-                    <li className="flex items-center gap-2"><Icon name="clock" className="w-4 h-4 text-slate-400" />{(d.availableTime || "09:00-17:00").replaceAll(",", ", ")}</li>
+                    <li className="flex items-center gap-2"><Icon name="calendar" className="w-4 h-4 text-brand-400" />{formatDays(d.availableDays, t)}</li>
+                    <li className="flex items-center gap-2"><Icon name="clock" className="w-4 h-4 text-brand-400" />{(d.availableTime || "09:00-17:00").replaceAll(",", ", ")}</li>
                   </ul>
-                  <Link to={bookLink} className="mt-6 block text-center px-4 py-2 rounded-xl border border-teal-600 text-teal-700 font-semibold hover:bg-teal-600 hover:text-white transition">
-                    Book Appointment
+                  <Link to={bookLink} className="mt-6 block text-center px-4 py-2.5 rounded-full border border-brand-600 text-brand-700 font-semibold hover:bg-brand-600 hover:text-white transition">
+                    {t("home.book")}
                   </Link>
                 </div>
               </div>
@@ -196,31 +213,49 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Advice for expecting mothers */}
+      <section id="advice" className="scroll-mt-32 py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <SectionTitle eyebrow={t("home.adviceEyebrow")} title={t("home.adviceTitle")} text={t("home.adviceText")} />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {t("home.advice").map((a, i) => (
+              <div key={a.title} className="relative p-7 rounded-3xl bg-white border border-brand-100 shadow-sm">
+                <span className="text-5xl font-extrabold text-brand-100">0{i + 1}</span>
+                <h3 className="mt-2 text-lg font-bold text-brand-900">{a.title}</h3>
+                <p className="mt-2 text-slate-600 text-sm leading-relaxed">{a.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* About / why us */}
-      <section id="about" className="scroll-mt-28 py-20 bg-white">
+      <section id="about" className="scroll-mt-32 py-20 bg-brand-50/60">
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
           <div className="relative">
-            <div className="aspect-[4/3] rounded-3xl bg-gradient-to-br from-teal-600 to-sky-600 p-10 flex flex-col justify-end text-white shadow-2xl">
-              <svg viewBox="0 0 32 32" className="w-20 h-20 mb-auto opacity-90" aria-hidden="true">
-                <path d="M13 7h6v6h6v6h-6v6h-6v-6H7v-6h6z" fill="currentColor" />
-              </svg>
-              <p className="text-3xl font-bold">{site.name}</p>
-              <p className="mt-2 text-teal-100">{site.tagline}.</p>
-            </div>
+            {/* Clinic banner (public/images/clinic-banner.jpg) */}
+            <img
+              src="/images/clinic-banner.jpg"
+              alt={t("brand.name")}
+              className="w-full rounded-3xl shadow-2xl shadow-brand-200 object-cover"
+            />
+            <img
+              src="/logo.jpg"
+              alt=""
+              className="absolute -bottom-8 -left-4 w-24 h-24 rounded-full bg-white p-1 shadow-xl hidden sm:block"
+            />
           </div>
           <div>
-            <p className="text-teal-600 font-semibold tracking-widest uppercase text-sm">Why Choose Us</p>
-            <h2 className="mt-2 text-3xl md:text-4xl font-bold text-slate-900">Healthcare built around you</h2>
-            <p className="mt-4 text-slate-600">
-              At {site.name} we combine skilled doctors with simple online tools, so getting care is as easy as possible.
-            </p>
-            <ul className="mt-8 space-y-6">
-              {REASONS.map((r) => (
-                <li key={r.title} className="flex gap-4">
-                  <Icon name="check" className="w-7 h-7 shrink-0 text-teal-600" />
+            <p className="text-red-600 font-semibold tracking-widest uppercase text-sm">{t("home.aboutEyebrow")}</p>
+            <h2 className="mt-2 text-3xl md:text-4xl font-bold text-brand-900">{t("home.aboutTitle")}</h2>
+            <p className="mt-4 text-slate-600">{t("home.aboutText", { name: t("brand.name") })}</p>
+            <ul className="mt-8 grid sm:grid-cols-2 gap-6">
+              {t("home.reasons").map((r) => (
+                <li key={r.title} className="flex gap-3">
+                  <Icon name="check" className="w-7 h-7 shrink-0 text-red-600" />
                   <div>
-                    <p className="font-semibold text-slate-900">{r.title}</p>
-                    <p className="text-slate-600">{r.text}</p>
+                    <p className="font-semibold text-brand-900">{r.title}</p>
+                    <p className="text-sm text-slate-600">{r.text}</p>
                   </div>
                 </li>
               ))}
@@ -230,38 +265,46 @@ const HomePage = () => {
       </section>
 
       {/* Call to action */}
-      <section className="bg-gradient-to-r from-teal-600 to-sky-600">
-        <div className="max-w-7xl mx-auto px-6 py-16 flex flex-col md:flex-row items-center justify-between gap-6">
+      <section className="bg-gradient-to-r from-brand-700 to-brand-500">
+        <div className="max-w-7xl mx-auto px-6 py-14 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-white">
-            <h2 className="text-3xl font-bold">Need to see a doctor?</h2>
-            <p className="mt-2 text-teal-50">Book your appointment online today - it only takes a minute.</p>
+            <h2 className="text-3xl font-bold">{t("home.ctaTitle")}</h2>
+            <p className="mt-2 text-brand-100">{t("home.ctaText")}</p>
           </div>
-          <Link to={session ? "/dashboard" : "/register"} className="px-8 py-4 rounded-xl bg-white text-teal-700 font-bold shadow-lg hover:bg-teal-50 transition">
-            {session ? "Go to Dashboard" : "Create Free Account"}
+          <Link to={session ? "/dashboard" : "/register"} className="px-8 py-4 rounded-full bg-red-600 text-white font-bold shadow-lg hover:bg-red-700 transition">
+            {session ? t("home.ctaDashboard") : t("home.ctaRegister")}
           </Link>
         </div>
       </section>
 
       {/* Contact */}
-      <section id="contact" className="scroll-mt-28 py-20 bg-slate-50">
+      <section id="contact" className="scroll-mt-32 py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle eyebrow="Contact Us" title="We're here to help" />
+          <SectionTitle eyebrow={t("home.contactEyebrow")} title={t("home.contactTitle")} />
           <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { icon: "phone", title: "Call Us", lines: [site.phone, `Emergency: ${site.emergencyPhone}`] },
-              { icon: "pin", title: "Visit Us", lines: [site.address] },
-              { icon: "clock", title: "Opening Hours", lines: site.hours.map((h) => `${h.days}: ${h.time}`) },
-            ].map((c) => (
-              <div key={c.title} className="bg-white rounded-2xl p-8 text-center shadow-sm border border-slate-100">
-                <span className="mx-auto flex items-center justify-center w-14 h-14 rounded-full bg-teal-50 text-teal-600">
-                  <Icon name={c.icon} className="w-7 h-7" />
-                </span>
-                <h3 className="mt-4 text-lg font-bold text-slate-900">{c.title}</h3>
-                {c.lines.map((l) => (
-                  <p key={l} className="text-slate-600 mt-1">{l}</p>
-                ))}
-              </div>
-            ))}
+            <div className="bg-brand-50/60 rounded-3xl p-8 text-center">
+              <span className="mx-auto flex items-center justify-center w-14 h-14 rounded-full bg-white text-brand-600 shadow-sm"><Icon name="phone" className="w-7 h-7" /></span>
+              <h3 className="mt-4 text-lg font-bold text-brand-900">{t("home.contactCall")}</h3>
+              <p className="text-slate-600 mt-1">{site.phone}</p>
+              <p className="text-red-600 font-semibold mt-1">{t("home.contactEmergency", { phone: site.emergencyPhone })}</p>
+            </div>
+            <div className="bg-brand-50/60 rounded-3xl p-8 text-center">
+              <span className="mx-auto flex items-center justify-center w-14 h-14 rounded-full bg-white text-brand-600 shadow-sm"><Icon name="pin" className="w-7 h-7" /></span>
+              <h3 className="mt-4 text-lg font-bold text-brand-900">{t("home.contactVisit")}</h3>
+              <p className="text-slate-600 mt-1">{site.address[lang]}</p>
+              {site.mapUrl && (
+                <a href={site.mapUrl} target="_blank" rel="noreferrer" className="inline-block mt-3 text-brand-700 font-semibold hover:underline">
+                  {t("home.openMap")}
+                </a>
+              )}
+            </div>
+            <div className="bg-brand-50/60 rounded-3xl p-8 text-center">
+              <span className="mx-auto flex items-center justify-center w-14 h-14 rounded-full bg-white text-brand-600 shadow-sm"><Icon name="clock" className="w-7 h-7" /></span>
+              <h3 className="mt-4 text-lg font-bold text-brand-900">{t("home.contactHours")}</h3>
+              {openingHours(t).map((h) => (
+                <p key={h.label} className="text-slate-600 mt-1">{h.label}: {h.time}</p>
+              ))}
+            </div>
           </div>
         </div>
       </section>

@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useLang } from "../i18n/LanguageContext";
 import doctorService from "../services/DoctorService";
 import appointmentService from "../services/AppointmentService";
 import { errorMessage } from "../services/api";
-import { formatDateTime } from "../utils/format";
+import AppointmentCard from "./AppointmentCard";
 
 const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 
 function DoctorDashboard() {
   const { session } = useAuth();
+  const { t } = useLang();
   const doctorId = session.doctorId;
 
   const [appointments, setAppointments] = useState([]);
@@ -22,7 +24,7 @@ function DoctorDashboard() {
     doctorService
       .getAppointments(doctorId)
       .then(setAppointments)
-      .catch((err) => setError(errorMessage(err, "Could not load appointments")));
+      .catch((err) => setError(errorMessage(err, t("doctorDash.loadFailed"))));
 
   useEffect(() => {
     if (!doctorId) return;
@@ -34,7 +36,7 @@ function DoctorDashboard() {
         setAvailableDays(doctor.availableDays || []);
         setAvailableTime(doctor.availableTime || "");
       })
-      .catch((err) => setError(errorMessage(err, "Could not load your profile")));
+      .catch((err) => setError(errorMessage(err, t("doctorDash.profileFailed"))));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doctorId]);
 
@@ -46,7 +48,7 @@ function DoctorDashboard() {
     appointmentService
       .updateStatus(id, status)
       .then(loadAppointments)
-      .catch((err) => setError(errorMessage(err)));
+      .catch((err) => setError(errorMessage(err, t("error"))));
   };
 
   const handleAvailabilitySubmit = () => {
@@ -64,67 +66,68 @@ function DoctorDashboard() {
       })
       .then((doctor) => {
         setProfile(doctor);
-        setMessage("Availability updated");
+        setMessage(t("doctorDash.saved"));
       })
-      .catch((err) => setError(errorMessage(err, "Could not update availability")));
+      .catch((err) => setError(errorMessage(err, t("doctorDash.updateFailed"))));
   };
 
   if (!doctorId) {
-    return <p className="text-red-500">This account is not linked to a doctor profile.</p>;
+    return <p className="text-red-600">{t("doctorDash.notLinked")}</p>;
   }
 
   return (
     <div>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      {message && <p className="text-green-600 mb-4">{message}</p>}
+      {error && <p className="text-red-600 mb-4">{error}</p>}
+      {message && <p className="text-green-700 mb-4">{message}</p>}
 
-      {/* Appointments Section */}
+      {/* Appointments */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Appointments</h2>
+        <h2 className="text-xl font-bold text-brand-900 mb-4">{t("doctorDash.appointments")}</h2>
 
         {appointments.length === 0 ? (
-          <p>No appointments</p>
+          <p className="text-slate-600">{t("doctorDash.none")}</p>
         ) : (
           <ul className="space-y-3">
             {appointments.map((appt) => (
-              <li key={appt.appointmentId} className="bg-white shadow-sm border border-slate-100 p-5 rounded-2xl">
-                <p><strong>Patient:</strong> {appt.patientName}</p>
-                <p><strong>When:</strong> {formatDateTime(appt.appointmentDate)}</p>
-                {appt.reason && <p><strong>Reason:</strong> {appt.reason}</p>}
-                <p><strong>Status:</strong> {appt.status}</p>
+              <AppointmentCard
+                key={appt.appointmentId}
+                appt={appt}
+                who={appt.patientName}
+                whoLabel={t("appointment.patient")}
+              >
                 {appt.status === "SCHEDULED" && (
-                  <div className="flex gap-2 mt-2">
+                  <>
                     <button
                       onClick={() => changeStatus(appt.appointmentId, "COMPLETED")}
-                      className="bg-teal-600 text-white px-3 py-1 rounded-lg hover:bg-teal-700 cursor-pointer"
+                      className="bg-brand-600 text-white px-4 py-1.5 rounded-full hover:bg-brand-700 cursor-pointer"
                     >
-                      Mark Completed
+                      {t("appointment.complete")}
                     </button>
                     <button
                       onClick={() => changeStatus(appt.appointmentId, "CANCELLED")}
-                      className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 cursor-pointer"
+                      className="bg-red-600 text-white px-4 py-1.5 rounded-full hover:bg-red-700 cursor-pointer"
                     >
-                      Cancel
+                      {t("appointment.cancel")}
                     </button>
-                  </div>
+                  </>
                 )}
-              </li>
+              </AppointmentCard>
             ))}
           </ul>
         )}
       </div>
 
-      {/* Availability Section */}
+      {/* Availability */}
       {profile && (
-        <div className="bg-white shadow-sm border border-slate-100 p-6 rounded-2xl w-full max-w-md">
-          <h2 className="text-xl font-semibold mb-4">Set Availability</h2>
+        <div className="bg-white shadow-sm border border-brand-100 p-6 rounded-3xl w-full max-w-md">
+          <h2 className="text-xl font-bold text-brand-900 mb-4">{t("doctorDash.availability")}</h2>
 
-          <p className="text-sm text-gray-600 mb-2">Working days (none selected = every day)</p>
-          <div className="grid grid-cols-2 gap-1 mb-3">
+          <p className="text-sm text-slate-600 mb-2">{t("doctorDash.workingDays")}</p>
+          <div className="grid grid-cols-2 gap-1 mb-4">
             {DAYS.map((day) => (
-              <label key={day}>
-                <input type="checkbox" checked={availableDays.includes(day)} onChange={() => toggleDay(day)} />{" "}
-                {day.charAt(0) + day.slice(1).toLowerCase()}
+              <label key={day} className="flex items-center gap-2">
+                <input type="checkbox" className="accent-brand-600" checked={availableDays.includes(day)} onChange={() => toggleDay(day)} />
+                {t(`days.${day}`)}
               </label>
             ))}
           </div>
@@ -132,13 +135,13 @@ function DoctorDashboard() {
           <input
             type="text"
             value={availableTime}
-            placeholder="Hours, e.g. 09:00-12:00,13:00-17:00 (blank = 09:00-17:00)"
-            className="border border-slate-300 rounded-lg p-2 w-full mb-3 focus:outline-none focus:ring-2 focus:ring-teal-300"
+            placeholder={t("doctorDash.hoursPlaceholder")}
+            className="border border-slate-300 rounded-xl px-3 py-2.5 w-full mb-4 focus:outline-none focus:ring-2 focus:ring-brand-300"
             onChange={(e) => setAvailableTime(e.target.value)}
           />
 
-          <button onClick={handleAvailabilitySubmit} className="bg-teal-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-teal-700 cursor-pointer">
-            Save
+          <button onClick={handleAvailabilitySubmit} className="bg-brand-600 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-brand-700 cursor-pointer">
+            {t("doctorDash.save")}
           </button>
         </div>
       )}

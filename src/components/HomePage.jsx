@@ -14,8 +14,8 @@ const initials = (d) => `${d.firstName?.[0] ?? ""}${d.lastName?.[0] ?? ""}`;
 
 const SectionTitle = ({ eyebrow, title, text }) => (
   <div className="max-w-2xl mx-auto text-center mb-12">
-    <p className="text-red-600 font-semibold tracking-widest uppercase text-sm">{eyebrow}</p>
-    <h2 className="mt-2 text-3xl md:text-4xl font-bold text-brand-900">{title}</h2>
+    {eyebrow && <p className="mb-2 text-red-600 font-semibold tracking-widest uppercase text-sm">{eyebrow}</p>}
+    <h2 className="text-3xl md:text-4xl font-bold text-brand-900">{title}</h2>
     {text && <p className="mt-4 text-slate-600">{text}</p>}
   </div>
 );
@@ -182,7 +182,7 @@ const HomePage = () => {
       {/* Doctors (live from the API) */}
       <section id="doctors" className="scroll-mt-32 py-20 bg-brand-50/60">
         <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle eyebrow={t("home.doctorsEyebrow")} title={t("home.doctorsTitle")} text={t("home.doctorsText")} />
+          <SectionTitle title={t("home.doctorsTitle")} text={t("home.doctorsText")} />
 
           {doctors === null && <p className="text-center text-slate-500">{t("home.doctorsLoading")}</p>}
           {doctors?.length === 0 && <p className="text-center text-slate-500">{t("home.doctorsNone")}</p>}
@@ -280,7 +280,7 @@ const HomePage = () => {
       {/* Contact */}
       <section id="contact" className="scroll-mt-32 py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle eyebrow={t("home.contactEyebrow")} title={t("home.contactTitle")} />
+          <SectionTitle title={t("home.contactTitle")} />
           <div className="grid md:grid-cols-3 gap-6">
             <div className="bg-brand-50/60 rounded-3xl p-8 text-center">
               <span className="mx-auto flex items-center justify-center w-14 h-14 rounded-full bg-white text-brand-600 shadow-sm"><Icon name="phone" className="w-7 h-7" /></span>
